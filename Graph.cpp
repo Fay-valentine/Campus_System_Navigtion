@@ -115,3 +115,32 @@ void map_graph::printAdjList()const
     std::cout << std::endl;
 
 }
+
+
+/**
+ * @brief 深度优先搜索（使用邻接矩阵）
+ * @param vertex 起始搜索顶点
+ * @param reset  是否需要重置visited数组
+ */
+void map_graph::dfs(int vertex,bool reset)
+{
+    if (reset)
+    {
+        for (int i=0;i<vertex_num;++i)//重置visited数组为 未被访问
+        {
+            visited[i]=false;
+        }
+        reset=false;
+    }
+
+    visited[vertex]=true;//入口设为已被访问过
+    std::cout << vertex+1<<"("<<placeNames[vertex]<<")"<<std::endl;//逐行打印顶点访问顺序
+    for (int j=0;j<vertex_num;++j)
+    {
+        //两顶点之间有连接，且顶点j未被访问过
+        if (adjMatrix[vertex][j]!=INF && adjMatrix[vertex][j]!=0 && visited[j]!=true)
+        {
+            dfs(j,false);//递归
+        }
+    }
+}

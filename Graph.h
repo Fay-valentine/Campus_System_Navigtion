@@ -27,7 +27,7 @@ private:
     std::string placeNames[MAXSIZE];//地点名称数组
     std::vector<std::vector<int>>adjMatrix;//邻接矩阵
     std::vector<std::vector<Edge>>adjList;//无向邻接表
-
+    bool visited[MAXSIZE];//表示该顶点是否访问过，下标对应每一个顶点;flase:未被访问  true:被访问过
 public:
     map_graph();
 
@@ -36,6 +36,8 @@ public:
     void printAdjMatrix()const;//加const确保只读
 
     void printAdjList()const;
+
+    void dfs(int vertex,bool reset);
 };
 
 #endif //_GRAPH_H
