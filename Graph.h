@@ -38,6 +38,8 @@ public:
     void printAdjList()const;
 
     void dfs(int vertex,bool reset);
+
+    void bfs(int vertex,bool reset);
 };
 
 #endif //_GRAPH_H

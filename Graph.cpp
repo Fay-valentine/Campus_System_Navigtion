@@ -3,9 +3,10 @@
 //
 #include "Graph.h"
 #include <iostream>
-#include<fstream>//文件操作 头文件
-#include<string>
-#include<iomanip>
+#include <fstream>//文件操作 头文件
+#include <string>
+#include <iomanip>
+#include <queue>
 //构造函数，初始化为INF，对角线为0
 map_graph::map_graph()
 {
@@ -122,7 +123,7 @@ void map_graph::printAdjList()const
  * @param vertex 起始搜索顶点
  * @param reset  是否需要重置visited数组
  */
-void map_graph::dfs(int vertex,bool reset)
+void map_graph::dfs(const int vertex,bool reset)
 {
     if (reset)
     {
@@ -133,6 +134,7 @@ void map_graph::dfs(int vertex,bool reset)
         reset=false;
     }
 
+
     visited[vertex]=true;//入口设为已被访问过
     std::cout << vertex+1<<"("<<placeNames[vertex]<<")"<<std::endl;//逐行打印顶点访问顺序
     for (int j=0;j<vertex_num;++j)
@@ -141,6 +143,45 @@ void map_graph::dfs(int vertex,bool reset)
         if (adjMatrix[vertex][j]!=INF && adjMatrix[vertex][j]!=0 && visited[j]!=true)
         {
             dfs(j,false);//递归
+        }
+    }
+}
+
+/**
+ * @brief 广度优先搜索(使用邻接矩阵)
+ * @param vertex 入口顶点
+ * @param reset  是否重置visited数组
+ */
+void map_graph::bfs(const int vertex, const bool reset)
+{
+    if (reset)//重置visited数组为 未被访问
+    {
+        for (int i=0;i<vertex_num;++i)
+        {
+            visited[i]=false;
+        }
+    }
+
+    std::queue<int>q;//队列中存的是 未访问过的顶点
+    q.push(vertex);//入队
+    visited[vertex]=true;//入口设为已被访问过
+
+    while (!q.empty())//队列为空 表明 所有顶点 已被访问
+    {
+        int cur=q.front();//取出队首的顶点，访问该顶点的"孩子"
+        q.pop();//出队,此时队列中只有顶点的孩子
+        std::cout << cur+1<<"("<<placeNames[cur]<<")"<<std::endl;//打印顶点访问
+
+        //访问顶点(cur)的孩子
+        for (int i=0;i<vertex_num;++i)
+        {
+            //两顶点之间有连接，且孩子i未被访问过
+            if (adjMatrix[cur][i]!=INF && visited[i]!=true)
+            {
+                q.push(i);//入队，作为下一层while循环的顶点(父节点)
+                visited[i]=true;
+
+            }
         }
     }
 }
