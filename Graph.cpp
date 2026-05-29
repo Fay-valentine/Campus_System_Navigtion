@@ -169,7 +169,7 @@ void map_graph::bfs(const int vertex, const bool reset)
     while (!q.empty())//队列为空 表明 所有顶点 已被访问
     {
         int cur=q.front();//取出队首的顶点，访问该顶点的"孩子"
-        q.pop();//出队,此时队列中只有顶点的孩子
+        q.pop();//出队,此后队列中只有顶点的孩子
         std::cout << cur+1<<"("<<placeNames[cur]<<")"<<std::endl;//打印顶点访问
 
         //访问顶点(cur)的孩子
@@ -180,7 +180,6 @@ void map_graph::bfs(const int vertex, const bool reset)
             {
                 q.push(i);//入队，作为下一层while循环的顶点(父节点)
                 visited[i]=true;
-
             }
         }
     }
