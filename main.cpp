@@ -22,8 +22,11 @@ int main()
 
     g.load_map_graph("map.txt");
 
-    g.printAdjMatrix();
+    //g.printAdjMatrix();
 
-    g.printAdjList();
+    //g.printAdjList();
+
+    //g.prim(0);
+    g.Dijkstra(0);
     return 0;
 }

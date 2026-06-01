@@ -8,8 +8,9 @@
 #include<vector>
 
 #define MAXSIZE     15//一共15个地点
+#define MAXEDGE     24
 
-const  int INF=1e9;//表示无穷
+const int INF=1e9;//表示无穷
 
 //每个adjList[i]的出边
 struct Edge
@@ -17,6 +18,14 @@ struct Edge
     int to;//与哪个结点相连
     int weight;//边的权重，表示两个地点之间距离
 };
+
+struct Kruskal_edge
+{
+    int begin;
+    int end;
+    int weight;
+};
+
 
 //校园地图的图类
 class map_graph
@@ -28,6 +37,7 @@ private:
     std::vector<std::vector<int>>adjMatrix;//邻接矩阵
     std::vector<std::vector<Edge>>adjList;//无向邻接表
     bool visited[MAXSIZE];//表示该顶点是否访问过，下标对应每一个顶点;flase:未被访问  true:被访问过
+    Kruskal_edge kruskal_edge[MAXEDGE];
 public:
     map_graph();
 
@@ -40,6 +50,14 @@ public:
     void dfs(int vertex,bool reset);
 
     void bfs(int vertex,bool reset);
+
+    void prim(int startVertex);
+
+    void Kruskal();
+
+    int Dijkstra_choose(const std::vector<int>& distance, const std::vector<bool>& found);
+
+    void Dijkstra(int begin);
 };
 
 #endif //_GRAPH_H

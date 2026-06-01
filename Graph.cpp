@@ -7,6 +7,8 @@
 #include <string>
 #include <iomanip>
 #include <queue>
+#include <vector>
+#include <algorithm>
 //构造函数，初始化为INF，对角线为0
 map_graph::map_graph()
 {
@@ -18,9 +20,9 @@ map_graph::map_graph()
     for (int i = 0; i < MAXSIZE; ++i)
     {
         adjMatrix[i][i] = 0;
+        visited[i]=false;
     }
     adjList.resize(MAXSIZE);
-    placeNames->resize(MAXSIZE);
 }
 
 //构造map_graph函数
@@ -182,5 +184,243 @@ void map_graph::bfs(const int vertex, const bool reset)
                 visited[i]=true;
             }
         }
+    }
+}
+
+void map_graph::prim(const int startVertex)
+{
+    std::vector<int>weight(vertex_num,INF);//存放候选边的权重
+    std::vector<int>parent(vertex_num,-1);//值表示父节点，索引表示子节点
+    std::vector<bool>inMST(vertex_num,false);//是否在最小生成树中
+
+    //通过weight数组和parent数组，来表示：在可选路径中，父节点(parent[i])到子节点(i)的权重为weight[i]
+    //weight的下标也对应子顶点
+
+    //先将起始顶点的权重存入weight，即添加起始顶点的可选路径
+    for (int i=0;i<vertex_num;++i)
+    {
+        weight[i]=adjMatrix[startVertex][i];
+        parent[i]=startVertex;//所有顶点的父节点是起始节点
+    }
+    //先初始化startVertex
+    weight[startVertex]=0;//自己到自己的权重为0
+    parent[startVertex]=-1;//起始节点无父节点
+    inMST[startVertex]=true;//起始节点存入最小生成树
+    std::cout << "加入顶点"<<startVertex+1<<"("<<placeNames[startVertex]<<")"<<std::endl;
+
+    for (int count=1;count<vertex_num;++count)//每次循环增加一个 最小权重的顶点
+    {
+        int minWeight=INF;
+        int newVertex=-1;
+        //寻找权重最小 的可选路径
+        for (int i=0;i<vertex_num;++i)
+        {
+            if (!inMST[i] && weight[i]<minWeight)//子节点不在最小生成树，且权重小于minWeight
+            {
+                minWeight=weight[i];
+                newVertex=i;//得到新顶点
+            }
+        }
+
+        if (newVertex==-1)//如果没有新顶点，说明本次循环的顶点是孤点，该图不联通
+        {
+            std::cout << "该图不联通"<<std::endl;
+            return;
+        }
+
+        //将newVertex加入到最小生成树中
+        inMST[newVertex]=true;
+        std::cout << "加入顶点"<<newVertex+1<<"("<<placeNames[newVertex]<<")"<<std::endl;
+
+        //将新顶点所连接的路径 更新到可选路径中,即更新parent数组;并更新对应权重，即同步更新weight数组
+        for (int i=0;i<vertex_num;++i)//循环中的i代表所连接的子顶点
+        {
+            if (!inMST[i] && adjMatrix[newVertex][i] != INF && adjMatrix[newVertex][i] != 0)
+            {
+                if (adjMatrix[newVertex][i]<weight[i])
+                {
+                    parent[i]=newVertex;//更新 顶点newVertex到顶点parent[i]这一条可选路径
+                    weight[i]=adjMatrix[newVertex][i];//更新对应路径的权重
+                }
+            }
+        }
+    }
+}
+
+void Kruskal_swap(Kruskal_edge edge[], int i, int j)
+{
+    int temp = edge[i].begin;
+    edge[i].begin = edge[j].begin;
+    edge[j].begin = temp;
+
+    temp = edge[i].end;
+    edge[i].end = edge[j].end;
+    edge[j].end = temp;
+
+    temp = edge[i].weight;
+    edge[i].weight = edge[j].weight;
+    edge[j].weight = temp;
+}
+
+void Kruskal_sort(Kruskal_edge edge[],int edgeNum)
+{
+    for (int i=0;i<edgeNum;++i)
+    {
+        for (int j=i+1;j<edgeNum;++j)
+        {
+            if (edge[i].weight>edge[j].weight)
+            {
+                Kruskal_swap(edge,i,j);
+            }
+        }
+
+    }
+}
+
+//find函数的作用就是找到顶点index的老大是谁，parent[index]的值就是顶点index的上级
+int Kruskal_find(int parent[],int index)
+{
+    while (parent[index]>0)//不断寻找上级，直到找到老大
+    {
+        index=parent[index];
+    }
+    return index;
+}
+
+void map_graph::Kruskal()
+{
+    edge_num=MAXEDGE;
+    Kruskal_edge edge[edge_num];
+    int k=0;
+    //通过邻接矩阵获取每一条边
+    for (int i=0;i<vertex_num;++i)
+    {
+        for (int j=i+1;j<vertex_num;++j)
+        {
+            if (adjMatrix[i][j]!=INF)
+            {
+                edge[k].begin=i;
+                edge[k].end=j;
+                edge[k].weight=adjMatrix[i][j];
+                k++;
+            }
+        }
+    }
+    //排序边，实现贪心选择的效果，从权重最小的开始连接
+    Kruskal_sort(edge,k);
+    //创建并初始化parent数组为0
+    int parent[vertex_num];
+    for (int i=0;i<vertex_num;++i)
+    {
+        parent[i]=0;//一开始每个人的老大是自己
+    }
+
+    int n;
+    int m;
+    for (int i=0;i<k;++i)
+    {
+        n=Kruskal_find(parent,edge[i].begin);//找顶点—edge[i].begin的老大
+        m=Kruskal_find(parent,edge[i].end);//找顶点-edge[i].end的老大
+        if (n!=m)//判断老大是否相同
+        {
+            parent[n]=m;//老大不同，则让begin的老大归顺于end的老大，合并帮派，使得只有一个老大（根）
+            //此时begin和end有了共同的老大，再把它们联通，就把两个帮派构成了一个新的联通帮派
+            std::cout << edge[i].begin<<"->"<<edge[i].end<<":"<<edge[i].weight<<std::endl;//输出连接的路径
+        }//如果老大相同，已经在同一个帮派 → 再连边就会形成环 → 跳过这条边。
+    }//最后使得有一个共同的老大，即最小生成树的根
+    //总之：一开始两个顶点一定是不联通的，
+    //当两个帮派（或者两个顶点）的老大不一样时（两帮派没有联通），合并出一个新的老大（确认共同的根），
+    //再连接，这样就获得了一个有 唯一老大的联通帮派
+    //保证了联通后的帮派一定有共同的老大
+    //当两顶点有共同老大时，说明它们一定是联通的，所以不需要再进行连接
+}
+
+/**
+ * @brief 找到未访问且距离起始点最短的顶点
+ * @param distance
+ * @param found
+ * @return
+ */
+int map_graph::Dijkstra_choose(const std::vector<int>& distance, const std::vector<bool>& found)
+{
+    int min=INF;
+    int minPos=-1;//-1在path数组中表示没有上一个顶点，即起始顶点
+    for (int i=0;i<vertex_num;i++)
+    {
+        if (!found[i] && distance[i]<min)
+        {
+            min=distance[i];//更新最短距离
+            minPos=i;//更新顶点
+        }
+    }
+    return minPos;
+}
+
+void map_graph::Dijkstra(int begin)
+{
+    std::vector<int> distance(vertex_num);
+    std::vector<int> path(vertex_num);
+    std::vector<bool> found(vertex_num);
+
+    //初始化
+    for (int i=0;i<vertex_num;++i)
+    {
+        found[i]=false;//全部点默认为未找到
+        distance[i]=adjMatrix[begin][i];//传入起始顶点 所能访问的顶点 及其距离
+        if (distance[i] != INF && i != begin)//初始化与起始顶点直接相连的顶点的path
+        {
+            path[i]=begin;
+        }
+        else
+        {
+            path[i]=-1;//表示无上一顶点
+        }
+    }
+
+    found[begin]=true;//已访问起始顶点
+    distance[begin]=0;//起始顶点到自身的距离为0
+
+    for (int i=1;i<vertex_num;++i)
+    {
+        //找到下一个要访问的顶点，该函数已经更新了顶点i的distance和path
+        int next=Dijkstra_choose(distance,found);
+        if (next == -1) break;   // 剩余顶点不可达，提前退出
+        found[next]=true;//已访问该顶点
+        //根据当前访问的顶点，更新 起始顶点 到 与当前顶点所连接的顶点 的距离和路径
+        for (int j=0;j<vertex_num;++j)
+        {
+            if (!found[j] && adjMatrix[next][j] != INF)//如果顶点j是未被访问的,且与当前顶点有连接
+            {
+                //如果 当前顶点到起始顶点的距离+当前顶点到顶点j的距离 < 起始顶点到顶点j的距离
+                if (distance[next]+adjMatrix[next][j] < distance[j])
+                {
+                    distance[j]=distance[next]+adjMatrix[next][j];//则更新出一段更小的路径
+                    path[j]=next;//更新顶点j的上一顶点为 当前顶点(next)
+                }
+            }
+
+        }
+    }
+
+    //输出起始顶点 到 每一个顶点 的最短路径和距离
+    for (int i=0;i<vertex_num;++i)
+    {
+        std::cout <<begin+1<<"("<<placeNames[begin]<<")"<<"->"<<i+1<<"("<<placeNames[i]<<")---";
+        std::cout << "distance:"<<distance[i]<<std::endl;
+        std::cout << "path:"<<std::endl;
+
+        std::vector<int>pathArr;
+        for (int v=i;v!=-1;v=path[v])
+        {
+            pathArr.push_back(v);//反向压入
+        }
+
+        std::reverse(pathArr.begin(),pathArr.end());//反转为正向
+        for (int k=0;k<pathArr.size();++k)
+        {
+            if (k > 0) std::cout << " -> ";
+            std::cout << pathArr[k]+1 << "(" << placeNames[pathArr[k]] << ")";
+        }
+        std::cout << std::endl << std::endl;
     }
 }
