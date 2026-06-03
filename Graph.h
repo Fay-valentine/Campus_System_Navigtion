@@ -64,6 +64,8 @@ public:
     void Dijkstra(int begin,std::vector<int>& distance, std::vector<int>& path);
     void Dijkstra_getAllPath(int begin);
     void Dijkstra_getSinglePath(int begin,int end);
+
+    void Floyd();
 };
 
 #endif //_GRAPH_H

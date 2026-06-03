@@ -474,3 +474,65 @@ void map_graph::Dijkstra_getSinglePath(int begin,int end)
     }
     std::cout << std::endl << std::endl;
 }
+
+void map_graph::Floyd()
+{
+    std::vector<std::vector<int>>distance(vertex_num,std::vector<int>(vertex_num));
+    std::vector<std::vector<int>>path(vertex_num,std::vector<int>(vertex_num));
+    for (int i=0;i<vertex_num;++i)
+    {
+        for (int j=0;j<vertex_num;++j)
+        {
+            distance[i][j]=adjMatrix[i][j];
+            if (i!=j && adjMatrix[i][j] != INF)
+            {
+                path[i][j]=j;// 初始时 i->j 的直接后继是 j
+            }
+            else
+            {
+                path[i][j]=-1;// 不可达或自身
+            }
+        }
+    }
+
+    //三层for循环:k:中转顶点  i:起点  j:终点
+    for (int k=0;k<vertex_num;++k)
+    {
+        for (int i=0;i<vertex_num;++i)
+        {
+            for (int j=0;j<vertex_num;++j)
+            {
+                //如果起点可通过中转顶点到达终点,且起点通过中转顶点到达终点的距离>起点到达终点的距离
+                if ( (distance[i][k]!=INF&&distance[k][j]!=INF) &&
+                    (distance[i][j]>distance[i][k]+distance[k][j]) )
+                {
+                    distance[i][j]=distance[i][k]+distance[k][j];//更新距离
+                    path[i][j]=k;//更新中转点
+                }
+            }
+        }
+    }
+
+    const int w = 5;
+    std::cout << "所有点对最短距离矩阵:" << std::endl;
+    // 打印列头
+    std::cout << std::setw(w) << " ";
+    for (int i = 0; i < vertex_num; ++i)
+        std::cout << std::setw(w) << ("V" + std::to_string(i));
+    std::cout << std::endl;
+
+    for (int i = 0; i < vertex_num; ++i)
+    {
+        // 打印行头
+        std::cout << std::setw(w) << ("V" + std::to_string(i));
+        for (int j = 0; j < vertex_num; ++j)
+        {
+            if (distance[i][j] == INF)
+                std::cout << std::setw(w) << "INF";
+            else
+                std::cout << std::setw(w) << distance[i][j];
+        }
+        std::cout << std::endl;
+    }
+    std::cout << std::endl;
+}

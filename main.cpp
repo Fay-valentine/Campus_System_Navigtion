@@ -88,6 +88,8 @@ int main()
                 refresh();
                 break;
             case 6:
+                g.Floyd();
+                refresh();
                 break;
             case 7:
                 std::cout << "欢迎下次使用" << std::endl;
