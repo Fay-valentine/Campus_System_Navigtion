@@ -9,6 +9,9 @@
 #include <queue>
 #include <vector>
 #include <algorithm>
+
+
+
 //构造函数，初始化为INF，对角线为0
 map_graph::map_graph()
 {
@@ -24,6 +27,24 @@ map_graph::map_graph()
     }
     adjList.resize(MAXSIZE);
 }
+
+int map_graph::get_vertex_num() const
+{
+    return vertex_num;
+}
+
+std::string map_graph::getPlaceName(int id) const
+{
+    if (id >= 0 && id < MAXSIZE)
+    {
+        return placeNames[id];
+    }
+    else
+    {
+        return "";   // 无效编号时返回空字符串
+    }
+}
+
 
 //构造map_graph函数
 bool map_graph::load_map_graph(const std::string& fileName)
@@ -108,10 +129,10 @@ void map_graph::printAdjList()const
     std::cout << "邻接表:"<<std::endl;
     for (int i=0;i<vertex_num;++i)
     {
-        std::cout <<"("<<placeNames[i]<<")"<<"V"<<i<<": ";//顶点,输出：V0(体育馆):
+        std::cout <<"("<<placeNames[i]<<")"<<i+1<<": ";//顶点,输出：V0(体育馆):
         for (int j=0;j<adjList[i].size();++j)
         {
-            std::cout <<"->"<< adjList[i][j].to<<"("<<adjList[i][j].weight<<")";
+            std::cout <<"->"<< (adjList[i][j].to)+1<<"-"<<placeNames[adjList[i][j].to]<<"("<<adjList[i][j].weight<<")";
         }
         std::cout << std::endl;
     }
@@ -356,12 +377,11 @@ int map_graph::Dijkstra_choose(const std::vector<int>& distance, const std::vect
     return minPos;
 }
 
-void map_graph::Dijkstra(int begin)
+void map_graph::Dijkstra(int begin,std::vector<int>& distance, std::vector<int>& path)
 {
-    std::vector<int> distance(vertex_num);
-    std::vector<int> path(vertex_num);
     std::vector<bool> found(vertex_num);
-
+    distance.assign(vertex_num,INF);
+    path.assign(vertex_num,-1);
     //初始化
     for (int i=0;i<vertex_num;++i)
     {
@@ -401,6 +421,13 @@ void map_graph::Dijkstra(int begin)
 
         }
     }
+}
+
+void map_graph::Dijkstra_getAllPath(int begin)
+{
+    std::vector<int>distance;
+    std::vector<int>path;
+    Dijkstra(begin,distance,path);
 
     //输出起始顶点 到 每一个顶点 的最短路径和距离
     for (int i=0;i<vertex_num;++i)
@@ -408,7 +435,7 @@ void map_graph::Dijkstra(int begin)
         std::cout <<begin+1<<"("<<placeNames[begin]<<")"<<"->"<<i+1<<"("<<placeNames[i]<<")---";
         std::cout << "distance:"<<distance[i]<<std::endl;
         std::cout << "path:"<<std::endl;
-
+        //把路径改为正向
         std::vector<int>pathArr;
         for (int v=i;v!=-1;v=path[v])
         {
@@ -423,4 +450,27 @@ void map_graph::Dijkstra(int begin)
         }
         std::cout << std::endl << std::endl;
     }
+}
+
+void map_graph::Dijkstra_getSinglePath(int begin,int end)
+{
+    std::vector<int>distance;
+    std::vector<int>path;
+    Dijkstra(begin,distance,path);
+    std::cout <<begin+1<<"("<<placeNames[begin]<<")"<<"->"<<end+1<<"("<<placeNames[end]<<")---";
+    std::cout << "distance:"<<distance[end]<<std::endl;
+    std::cout << "path:"<<std::endl;
+    //把路径改为正向
+    std::vector<int>pathArr;
+    for (int v=end;v!=-1;v=path[v])
+    {
+        pathArr.push_back(v);//反向压入
+    }
+    std::reverse(pathArr.begin(),pathArr.end());//反转为正向
+    for (int k=0;k<pathArr.size();++k)
+    {
+        if (k > 0) std::cout << " -> ";
+        std::cout << pathArr[k]+1 << "(" << placeNames[pathArr[k]] << ")";
+    }
+    std::cout << std::endl << std::endl;
 }

@@ -41,6 +41,10 @@ private:
 public:
     map_graph();
 
+    int get_vertex_num() const;
+
+    std::string getPlaceName(int id) const;
+
     bool load_map_graph(const std::string& fileName);
 
     void printAdjMatrix()const;//加const确保只读
@@ -57,7 +61,9 @@ public:
 
     int Dijkstra_choose(const std::vector<int>& distance, const std::vector<bool>& found);
 
-    void Dijkstra(int begin);
+    void Dijkstra(int begin,std::vector<int>& distance, std::vector<int>& path);
+    void Dijkstra_getAllPath(int begin);
+    void Dijkstra_getSinglePath(int begin,int end);
 };
 
 #endif //_GRAPH_H
