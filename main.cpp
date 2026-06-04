@@ -53,21 +53,35 @@ int main()
                 refresh();
                 break;
             case 3:
-                break;
-            case 4:
-                std::cout << "请输入下列出发点(输入对应数字):"<<std::endl;
+                std::cout << "请输入打卡的出发点:"<<std::endl;
                 showPlaces(g);
-                int start;
+                int start_3;
                 while (true)
                 {
-                    std::cin>>start;
-                    if (start>=1 && start<=15)
+                    std::cin>>start_3;
+                    if (start_3>=1 && start_3<=15)
                     {
                         break;
                     }
                     std::cout << "输入错误，应输入数字1-15"<<std::endl;
                 }
-                g.Dijkstra_getAllPath(start-1);
+                g.TSP_greedy(start_3-1);
+                refresh();
+                break;
+            case 4:
+                std::cout << "请输入下列出发点(输入对应数字):"<<std::endl;
+                showPlaces(g);
+                int start_4;
+                while (true)
+                {
+                    std::cin>>start_4;
+                    if (start_4>=1 && start_4<=15)
+                    {
+                        break;
+                    }
+                    std::cout << "输入错误，应输入数字1-15"<<std::endl;
+                }
+                g.Dijkstra_getAllPath(start_4-1);
                 refresh();
                 break;
 
@@ -78,7 +92,7 @@ int main()
                 while (true)
                 {
                     std::cin>>begin>>end;
-                    if ( (start>=1 && start<=15) && (end>=1 && end<=15) )
+                    if ( (start_4>=1 && start_4<=15) && (end>=1 && end<=15) )
                     {
                         break;
                     }

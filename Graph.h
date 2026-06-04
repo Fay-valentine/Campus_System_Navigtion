@@ -66,6 +66,8 @@ public:
     void Dijkstra_getSinglePath(int begin,int end);
 
     void Floyd();
+
+    void TSP_greedy(int start);
 };
 
 #endif //_GRAPH_H

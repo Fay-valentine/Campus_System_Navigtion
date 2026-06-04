@@ -358,9 +358,6 @@ void map_graph::Kruskal()
 
 /**
  * @brief 找到未访问且距离起始点最短的顶点
- * @param distance
- * @param found
- * @return
  */
 int map_graph::Dijkstra_choose(const std::vector<int>& distance, const std::vector<bool>& found)
 {
@@ -377,6 +374,12 @@ int map_graph::Dijkstra_choose(const std::vector<int>& distance, const std::vect
     return minPos;
 }
 
+/**
+ * @brief 得到distance数组，；path数组
+ * @param begin 起点
+ * @param distance 存放起点到各点之间的最短距离
+ * @param path path[i]表示点i的下一个点，不断访问i=path[i]获取点i->起点的路径(反向的)
+ */
 void map_graph::Dijkstra(int begin,std::vector<int>& distance, std::vector<int>& path)
 {
     std::vector<bool> found(vertex_num);
@@ -467,6 +470,8 @@ void map_graph::Dijkstra_getSinglePath(int begin,int end)
         pathArr.push_back(v);//反向压入
     }
     std::reverse(pathArr.begin(),pathArr.end());//反转为正向
+
+    //输出路径
     for (int k=0;k<pathArr.size();++k)
     {
         if (k > 0) std::cout << " -> ";
@@ -536,3 +541,116 @@ void map_graph::Floyd()
     }
     std::cout << std::endl;
 }
+
+/**
+ * @brief 使用贪心算法打卡每一个点，然后使用Dijkstra算法从终点返回起点
+ */
+void map_graph::TSP_greedy(int start)
+{
+    //1.贪心算法部分
+    std::vector<bool>visited(vertex_num,false);//存放每个顶点是否访问过
+    std::vector<int>path_checkIn;//存放打卡的路径(不包含返回的)
+
+    visited[start]=true;//起点被访问
+    path_checkIn.push_back(start);//把start添加到路径
+
+    int totalDist=0;//总路程
+    int current=start;//当前所在顶点，起始为start
+
+    for (int i=1;i<vertex_num;++i)//i对应访问的每一个未访问顶点
+    {
+        //每次循环都使用一次Dijkstra获取current的最短未访问顶点，防止current没有直连的顶点
+        std::vector<int>temp_dist;
+        std::vector<int>temp_path;
+
+        Dijkstra(current,temp_dist,temp_path);
+
+        int minDist=INF;//离顶点i最短的路径
+        int next=-1;//下一个要访问的顶点
+
+        for (int j=0;j<vertex_num;++j)//j对应在i点时，找出的离i最近的点
+        {
+            if (!visited[j] && temp_dist[j]<minDist)//未被访问过，且是离i最近的点j
+            {
+                minDist=temp_dist[j];//更新最小距离
+                next=j;//下一个顶点访问j
+            }
+        }
+        if (next==-1)
+        {
+            std::cout << "图不联通"<<std::endl;
+            return;
+        }
+
+        //构建current到next的路径
+        std::vector<int>curTonext;
+        for (int k=next;k!=current;k=temp_path[k])//获取next到current的路径
+        {
+            curTonext.push_back(k);
+        }
+        std::reverse(curTonext.begin(),curTonext.end());//反转变为current到next的路径
+
+        //加入到打卡路径中
+        for (int k=0;k<curTonext.size();++k)
+        {
+            path_checkIn.push_back(curTonext[k]);
+            visited[curTonext[k]]=true;
+        }
+
+        totalDist+=minDist;//更新总路程
+        current=next;//更新当前顶点
+    }
+
+    //2.终点回到起点，使用Dijkstra
+    std::vector<int>distance;
+    std::vector<int>path_Dijkstra;
+    Dijkstra(current,distance,path_Dijkstra);//计算从 current 到所有点的最短路径，把current当成起点
+
+    //判断图是否联通
+    if (distance[start] == INF)
+    {
+        std::cout << "无法从最后一个点返回起点，图不连通！" << std::endl;
+        return;
+    }
+
+    totalDist+=distance[start];//加上从终点返回起点的距离
+
+    std::cout << "total distance:"<<totalDist<<std::endl;//输出路程
+    std::cout << "path:"<<std::endl;
+    //把路径改为正向
+    std::vector<int>path_back;
+    for (int v=start;v!=current;v=path_Dijkstra[v])//这里把start当作返回路径中的终点
+    {
+        path_back.push_back(v);//反向压入
+    }
+    path_back.push_back(current);//加入终点current
+    std::reverse(path_back.begin(),path_back.end());//反转为正向
+
+    //3.输出路径
+    //起点到终点（打卡路径）
+    std::cout << "打卡路径:"<<std::endl;
+    for (int k=0;k<path_checkIn.size();++k)
+    {
+        if (k!=0 && k%5==0)
+        {
+            std::cout<<std::endl;
+        }
+        if (k > 0) std::cout << " -> ";
+        std::cout << path_checkIn[k]+1 << "(" << placeNames[path_checkIn[k]] << ")";
+    }
+    std::cout << std::endl;
+    //终点到起点（返回路径）
+    std::cout << "返回路径:"<<std::endl;
+    for (int k=0;k<path_back.size();++k)
+    {
+        if (k!=0 && k%5==0)
+        {
+            std::cout<<std::endl;
+        }
+        if (k > 0) std::cout << " -> ";
+        std::cout << path_back[k]+1 << "(" << placeNames[path_back[k]] << ")";
+    }
+    std::cout << std::endl << std::endl;
+}
+
+
